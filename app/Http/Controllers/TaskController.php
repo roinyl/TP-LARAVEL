@@ -19,32 +19,36 @@ class TaskController extends Controller
         return view('tasks.create');
     }
 
-    public function store(Request $request)
+    public function post(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
-        Task::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => 'todo',
-            'user_id' => auth()->id(),
-        ]);
+        $task = new Task();
+        $task->title = $request->title;
+        $task->description = $request->description;
+        $task->status = 'todo';
+        $task->user_id = auth()->id();
+        $task->save();
 
-        return redirect()->route('tasks.index');
+        return redirect('/tasks');
     }
 
-    public function edit(Task $task)
+    public function form_update($id)
     {
+        $task = Task::findOrFail($id);
+
         abort_if($task->user_id !== auth()->id(), 403);
 
         return view('tasks.edit', compact('task'));
     }
 
-    public function update(Request $request, Task $task)
+    public function do_update(Request $request, $id)
     {
+        $task = Task::findOrFail($id);
+
         abort_if($task->user_id !== auth()->id(), 403);
 
         $request->validate([
@@ -53,17 +57,31 @@ class TaskController extends Controller
             'status' => 'required|in:todo,doing,done',
         ]);
 
-        $task->update($request->only('title', 'description', 'status'));
+        $task->title = $request->title;
+        $task->description = $request->description;
+        $task->status = $request->status;
+        $task->save();
 
-        return redirect()->route('tasks.index');
+        return redirect('/tasks');
     }
 
-    public function destroy(Task $task)
+    public function show($id)
     {
+        $task = Task::findOrFail($id);
+
+        abort_if($task->user_id !== auth()->id(), 403);
+
+        return view('tasks.show', ['task' => $task]);
+    }
+
+    public function delete($id)
+    {
+        $task = Task::findOrFail($id);
+
         abort_if($task->user_id !== auth()->id(), 403);
 
         $task->delete();
 
-        return redirect()->route('tasks.index');
+        return redirect('/tasks');
     }
 }
