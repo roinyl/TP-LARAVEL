@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
@@ -13,10 +11,7 @@ class TaskController extends Controller
     // Affiche la liste des tâches de l'utilisateur connecté
     public function index()
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        $tasks = $user->tasks()->get();
+        $tasks = Auth::user()->tasks()->get();
 
         return view('tasks.index', compact('tasks'));
     }
@@ -30,39 +25,29 @@ class TaskController extends Controller
     // Enregistre une nouvelle tâche
     public function store(TaskRequest $request)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Grâce à la relation hasMany, Laravel remplit automatiquement user_id
-        $user->tasks()->create([
+        Auth::user()->tasks()->create([
             'title' => $request->title,
             'description' => $request->description,
             'status' => 'todo',
         ]);
 
-        return redirect('/tasks')->with('success', 'Votre tâche a été créée avec succès.');
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Votre tâche a été créée avec succès.');
     }
 
     // Affiche le formulaire de modification d'une tâche
     public function form_update(int $id)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Recherche uniquement dans les tâches de l'utilisateur connecté
-        $task = $user->tasks()->findOrFail($id);
+        $task = Auth::user()->tasks()->findOrFail($id);
 
         return view('tasks.edit', compact('task'));
     }
 
-    // Met à jour une tâche existante
+    // Met à jour une tâche
     public function do_update(UpdateTaskRequest $request, int $id)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Empêche de modifier une tâche appartenant à un autre utilisateur
-        $task = $user->tasks()->findOrFail($id);
+        $task = Auth::user()->tasks()->findOrFail($id); // si existe pas retourne 404
 
         $task->update([
             'title' => $request->title,
@@ -70,17 +55,15 @@ class TaskController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect('/tasks')->with('sucess', 'votre tache a été modifier avec success');
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Votre tâche a été modifiée avec succès.');
     }
 
     // Affiche le détail d'une tâche
     public function show(int $id)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Recherche uniquement dans les tâches de l'utilisateur connecté
-        $task = $user->tasks()->findOrFail($id);
+        $task = Auth::user()->tasks()->findOrFail($id);
 
         return view('tasks.show', compact('task'));
     }
@@ -88,14 +71,12 @@ class TaskController extends Controller
     // Supprime une tâche
     public function delete(int $id)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Empêche de supprimer une tâche appartenant à un autre utilisateur
-        $task = $user->tasks()->findOrFail($id);
+        $task = Auth::user()->tasks()->findOrFail($id);
 
         $task->delete();
 
-        return redirect('/tasks')->with('sucess', 'votre tache a été supprimer avec succes');
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Votre tâche a été supprimée avec succès.');
     }
 }
