@@ -2,86 +2,100 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
-use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
+    // Affiche la liste des tâches de l'utilisateur connecté
     public function index()
     {
-        $tasks = Task::where('user_id', auth()->id())->get();
+        /** @var User $user */
+        $user = Auth::user();
+
+        $tasks = $user->tasks()->get();
 
         return view('tasks.index', compact('tasks'));
     }
 
+    // Affiche le formulaire de création d'une tâche
     public function create()
     {
         return view('tasks.create');
     }
 
-    public function post(Request $request)
+    // Enregistre une nouvelle tâche
+    public function store(TaskRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Grâce à la relation hasMany, Laravel remplit automatiquement user_id
+        $user->tasks()->create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => 'todo',
         ]);
 
-        $task = new Task();
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->status = 'todo';
-        $task->user_id = auth()->id();
-        $task->save();
-
-        return redirect('/tasks');
+        return redirect('/tasks')->with('success', 'Votre tâche a été créée avec succès.');
     }
 
-    public function form_update($id)
+    // Affiche le formulaire de modification d'une tâche
+    public function form_update(int $id)
     {
-        $task = Task::findOrFail($id);
+        /** @var User $user */
+        $user = Auth::user();
 
-        abort_if($task->user_id !== auth()->id(), 403);
+        // Recherche uniquement dans les tâches de l'utilisateur connecté
+        $task = $user->tasks()->findOrFail($id);
 
         return view('tasks.edit', compact('task'));
     }
 
-    public function do_update(Request $request, $id)
+    // Met à jour une tâche existante
+    public function do_update(UpdateTaskRequest $request, int $id)
     {
-        $task = Task::findOrFail($id);
+        /** @var User $user */
+        $user = Auth::user();
 
-        abort_if($task->user_id !== auth()->id(), 403);
+        // Empêche de modifier une tâche appartenant à un autre utilisateur
+        $task = $user->tasks()->findOrFail($id);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|in:todo,doing,done',
+        $task->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => $request->status,
         ]);
 
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->status = $request->status;
-        $task->save();
-
-        return redirect('/tasks');
+        return redirect('/tasks')->with('sucess', 'votre tache a été modifier avec success');
     }
 
-    public function show($id)
+    // Affiche le détail d'une tâche
+    public function show(int $id)
     {
-        $task = Task::findOrFail($id);
+        /** @var User $user */
+        $user = Auth::user();
 
-        abort_if($task->user_id !== auth()->id(), 403);
+        // Recherche uniquement dans les tâches de l'utilisateur connecté
+        $task = $user->tasks()->findOrFail($id);
 
-        return view('tasks.show', ['task' => $task]);
+        return view('tasks.show', compact('task'));
     }
 
-    public function delete($id)
+    // Supprime une tâche
+    public function delete(int $id)
     {
-        $task = Task::findOrFail($id);
+        /** @var User $user */
+        $user = Auth::user();
 
-        abort_if($task->user_id !== auth()->id(), 403);
+        // Empêche de supprimer une tâche appartenant à un autre utilisateur
+        $task = $user->tasks()->findOrFail($id);
 
         $task->delete();
 
-        return redirect('/tasks');
+        return redirect('/tasks')->with('sucess', 'votre tache a été supprimer avec succes');
     }
 }
