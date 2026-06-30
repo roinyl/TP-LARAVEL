@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Task;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,8 +12,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
 
     $user = Auth::user();
-
-    $tasks = Task::where('user_id', $user->id)->get();
 
     return view('dashboard', [ 
         'total' => $user->tasks()->count(),
@@ -46,4 +43,4 @@ require __DIR__.'/auth.php';
 
 Route::get('/profile/2fa', function () {
     return view('profile.two-factor');
-})->middleware('auth')->name('profile.2fa');
+})->middleware(['auth', 'verified'])->name('profile.2fa');
