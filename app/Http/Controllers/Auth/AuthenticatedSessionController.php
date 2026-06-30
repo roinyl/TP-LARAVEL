@@ -26,6 +26,21 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+
+        if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
+            $remember = $request->boolean('remember');
+
+            Auth::guard('web')->logout();
+
+            $request->session()->put([
+                'login.id' => $user->getKey(),
+                'login.remember' => $remember,
+            ]);
+
+            return redirect()->route('two-factor.login');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
