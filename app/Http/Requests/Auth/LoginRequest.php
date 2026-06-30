@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -54,6 +55,28 @@ class LoginRequest extends FormRequest
         }
     
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Validate credentials without logging the user in yet.
+     *
+     * @throws ValidationException
+     */
+    public function authenticateForTwoFactor(): User
+    {
+        $this->ensureIsNotRateLimited();
+
+        if (! Auth::validate($this->only('email', 'password'))) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+
+        RateLimiter::clear($this->throttleKey());
+
+        return User::where('email', (string) $this->string('email'))->firstOrFail();
     }
 
     /**
