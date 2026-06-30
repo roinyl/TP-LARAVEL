@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Task extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
     
     protected $fillable = [
         'title',

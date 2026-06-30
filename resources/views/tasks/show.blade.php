@@ -1,10 +1,10 @@
 Ma tache : {{ $task->title }}
 
-</br>
+<br>
 {{ $task->description }}
 
-</br>
+<br>
 status : {{ $task->status }}
 
-</br>
-<a href="/tasks">Retour</a>
+<br>
+<a href="{{ route('tasks.index') }}">Retour</a>

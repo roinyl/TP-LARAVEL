@@ -39,8 +39,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
-
-
-Route::get('/profile/2fa', function () {
-    return view('profile.two-factor');
-})->middleware(['auth', 'verified'])->name('profile.2fa');

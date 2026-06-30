@@ -4,7 +4,7 @@
     <p>{{ session('success') }}</p>
 @endif
 
-<form action="/tasks/create" method="POST">
+<form action="{{ route('tasks.store') }}" method="POST">
     @csrf
 
     <label for="title">Titre :</label>

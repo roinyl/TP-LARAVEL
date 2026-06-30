@@ -41,7 +41,7 @@ class TaskRequest extends FormRequest
     {
         $this->merge([
             'title' => ucwords(trim($this->title)), // met la premiere lettre de chaque mot en maj et retire les epsaces inutiles
-            'description' => ucfirst(trim($this->description)), // met la premiere lettre en maj et retire les espaces inutiles
+            'description' => $this->description ? ucfirst(trim($this->description)) : null, // met la premiere lettre en maj et retire les espaces inutiles
         ]);
     }
 }
