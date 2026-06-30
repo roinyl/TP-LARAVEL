@@ -19,6 +19,15 @@
                 </div>
             </div>
 
+            {{-- A2F --}}
+            <div>
+                <div>
+                    <a href="{{ route('profile.2fa') }}" class="text-blue-600">
+                        Gérer l’A2F
+                    </a>
+                </div>
+            </div>
+
             <div>
                 <div>
                     @include('profile.partials.delete-user-form')
