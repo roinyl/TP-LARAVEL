@@ -16,11 +16,11 @@ Route::get('/dashboard', function () {
 
     $tasks = Task::where('user_id', $user->id)->get();
 
-    return view('dashboard', [
-        'total' => $tasks->count(),
-        'todo' => $tasks->where('status', 'todo')->count(),
-        'doing' => $tasks->where('status', 'doing')->count(),
-        'done' => $tasks->where('status', 'done')->count(),
+    return view('dashboard', [ 
+        'total' => $user->tasks()->count(),
+        'todo' => $user->tasks()->status('todo')->count(),
+        'doing' => $user->tasks()->status('doing')->count(),
+        'done' => $user->tasks()->status('done')->count(),
     ]);
 
 })->middleware(['auth', 'verified'])->name('dashboard');

@@ -12,7 +12,7 @@ class CheckTaskOwner
         $task = Task::findOrFail($request->route('id'));
 
         if ($task->user_id !== auth()->id()) {
-            abort(403, "Vous n'avez pas accès a cette tache : la tache ne vous appartient pas !");
+            abort(404, "Vous n'avez pas accès a cette tache : la tache ne vous appartient pas !");
         }
 
         return $next($request);
