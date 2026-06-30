@@ -11,7 +11,7 @@ class TaskController extends Controller
     // Affiche la liste des tâches de l'utilisateur connecté
     public function index()
     {
-        $tasks = Auth::user()->tasks()->get();
+        $tasks = Auth::user()->tasks()->paginate(5);
 
         return view('tasks.index', compact('tasks'));
     }

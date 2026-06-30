@@ -10,9 +10,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            UserSeeder::class,
-            TaskSeeder::class,
+        $user = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
         ]);
+
+        Task::factory()
+            ->count(200)
+            ->create([
+                'user_id' => $user->id,
+            ]);
     }
 }
